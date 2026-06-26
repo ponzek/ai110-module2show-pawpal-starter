@@ -20,9 +20,9 @@ class Task:
     title: str
     duration_minutes: int
     priority: str = "medium"  # "low", "medium", "high"
-    category: str = "general"  # e.g. "walk", "feeding", "meds", "grooming", "enrichment"
+    category: str = "general"  # "walk", "feeding", "meds", "grooming", "enrichment"
     is_recurring: bool = False
-    preferred_time: Optional[str] = None  # e.g. "08:00"
+    preferred_time: Optional[str] = None  # "08:00"
     completed: bool = False
 
     def is_valid(self) -> bool:
