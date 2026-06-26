@@ -113,6 +113,11 @@ st.divider()
 st.subheader("📅 Generate Schedule")
 
 sort_option = st.radio("Sort tasks by:", ["Priority (high first)", "Time (earliest first)"], horizontal=True)
+mode = st.radio(
+    "Scheduling mode:",
+    ["Greedy (pick by priority order)", "Optimized (knapsack — maximize total value)"],
+    horizontal=True,
+)
 
 if st.button("Build Today's Schedule"):
     all_tasks = owner.get_all_tasks()
@@ -121,7 +126,12 @@ if st.button("Build Today's Schedule"):
         st.warning("No tasks to schedule. Add some tasks first!")
     else:
         scheduler = Scheduler(owner)
-        schedule = scheduler.generate_schedule()
+
+        if "Optimized" in mode:
+            schedule = scheduler.generate_optimized_schedule()
+            st.caption("Using knapsack algorithm to maximize total priority value.")
+        else:
+            schedule = scheduler.generate_schedule()
 
         # Sort the display based on user choice
         if sort_option == "Time (earliest first)":

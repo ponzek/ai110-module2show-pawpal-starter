@@ -336,3 +336,73 @@ class TestEdgeCases:
         scheduler = Scheduler(owner)
         result = scheduler.filter_by_pet("Ghost")
         assert result == []
+
+
+# --- 8. Knapsack Optimizer ---
+
+class TestKnapsackOptimizer:
+    """Verify the knapsack algorithm picks the best combination of tasks."""
+
+    def test_knapsack_picks_higher_value_over_greedy(self):
+        """The greedy approach would pick the first high-priority task and run out
+        of time, but knapsack should find a better combination."""
+        owner = Owner(name="Test", available_minutes=30)
+        pet = Pet(name="Rex", species="dog")
+
+        # Greedy picks the 25-min high task first, leaving only 5 min (can't fit anything else)
+        # Knapsack should pick the two medium tasks (15+15=30 min, value 2+2=4)
+        # instead of the one high task (25 min, value 3)
+        pet.add_task(Task(title="Big walk", duration_minutes=25, priority="high"))
+        pet.add_task(Task(title="Feed AM", duration_minutes=15, priority="medium"))
+        pet.add_task(Task(title="Feed PM", duration_minutes=15, priority="medium"))
+        owner.add_pet(pet)
+
+        scheduler = Scheduler(owner)
+        result = scheduler.optimize_knapsack(pet.get_tasks(), 30)
+
+        total_value = sum({"high": 3, "medium": 2, "low": 1}[t.priority] for t in result)
+        total_duration = sum(t.duration_minutes for t in result)
+
+        # Knapsack should get value 4 (two mediums) instead of 3 (one high)
+        assert total_value == 4
+        assert total_duration <= 30
+
+    def test_knapsack_with_empty_tasks(self):
+        owner = Owner(name="Test", available_minutes=60)
+        pet = Pet(name="Rex", species="dog")
+        owner.add_pet(pet)
+
+        scheduler = Scheduler(owner)
+        result = scheduler.optimize_knapsack([], 60)
+        assert result == []
+
+    def test_knapsack_respects_capacity(self):
+        owner = Owner(name="Test", available_minutes=20)
+        pet = Pet(name="Rex", species="dog")
+        pet.add_task(Task(title="Long walk", duration_minutes=60, priority="high"))
+        owner.add_pet(pet)
+
+        scheduler = Scheduler(owner)
+        result = scheduler.optimize_knapsack(pet.get_tasks(), 20)
+
+        # Task doesn't fit, should return nothing
+        assert len(result) == 0
+
+    def test_optimized_schedule_returns_valid_entries(self):
+        owner = Owner(name="Test", available_minutes=60)
+        pet = Pet(name="Rex", species="dog")
+        pet.add_task(Task(title="Walk", duration_minutes=20, priority="high"))
+        pet.add_task(Task(title="Feed", duration_minutes=10, priority="high"))
+        owner.add_pet(pet)
+
+        scheduler = Scheduler(owner)
+        schedule = scheduler.generate_optimized_schedule()
+
+        # Should have both tasks
+        assert len(schedule) == 2
+        # Each entry should have the right keys
+        for entry in schedule:
+            assert "task" in entry
+            assert "start" in entry
+            assert "end" in entry
+            assert "priority" in entry

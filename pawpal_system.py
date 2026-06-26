@@ -243,6 +243,100 @@ class Scheduler:
                 remaining -= task.duration_minutes
         return selected
 
+    def optimize_knapsack(self, tasks: list[Task], capacity: int) -> list[Task]:
+        """Use dynamic programming to find the best set of tasks that maximizes
+        total priority value while fitting within the time budget.
+
+        This is the 0/1 knapsack algorithm:
+        - Each task has a 'weight' (duration in minutes) and a 'value' (priority rank).
+        - We want to maximize total value without exceeding capacity.
+        - We build a table where dp[i][w] = best value using first i tasks with w minutes.
+        - Then we trace back through the table to find which tasks were picked.
+        """
+        n = len(tasks)
+        if n == 0:
+            return []
+
+        # Get the priority value for each task
+        values = [PRIORITY_RANK.get(t.priority, 0) for t in tasks]
+        weights = [t.duration_minutes for t in tasks]
+
+        # Build the DP table
+        # dp[i][w] = max priority value using tasks 0..i-1 with w minutes available
+        dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+
+        for i in range(1, n + 1):
+            for w in range(capacity + 1):
+                # Option 1: skip this task
+                dp[i][w] = dp[i - 1][w]
+
+                # Option 2: include this task (if it fits)
+                if weights[i - 1] <= w:
+                    include_value = dp[i - 1][w - weights[i - 1]] + values[i - 1]
+                    if include_value > dp[i][w]:
+                        dp[i][w] = include_value
+
+        # Trace back to find which tasks were selected
+        selected = []
+        w = capacity
+        for i in range(n, 0, -1):
+            if dp[i][w] != dp[i - 1][w]:
+                selected.append(tasks[i - 1])
+                w -= weights[i - 1]
+
+        # Reverse so they come out in original order
+        selected.reverse()
+        return selected
+
+    def generate_optimized_schedule(self) -> list[dict]:
+        """Build a schedule using the knapsack algorithm to maximize priority value."""
+        all_tasks = self.owner.get_all_tasks()
+
+        # Use knapsack to pick the best combination of tasks
+        best_tasks = self.optimize_knapsack(all_tasks, self.total_minutes)
+
+        # Sort the selected tasks by time for a clean schedule
+        best_tasks = self.sort_by_time(best_tasks)
+
+        # Build time slots
+        schedule = []
+        current_hour = 8
+        current_minute = 0
+
+        for task in best_tasks:
+            if task.preferred_time:
+                parts = task.preferred_time.split(":")
+                start_hour = int(parts[0])
+                start_min = int(parts[1])
+            else:
+                start_hour = current_hour
+                start_min = current_minute
+
+            end_total_min = start_hour * 60 + start_min + task.duration_minutes
+            end_hour = end_total_min // 60
+            end_min = end_total_min % 60
+
+            pet_name = "Unknown"
+            for pet in self.owner.get_pets():
+                if task in pet.get_tasks():
+                    pet_name = pet.name
+                    break
+
+            schedule.append({
+                "pet": pet_name,
+                "task": task.title,
+                "start": f"{start_hour:02d}:{start_min:02d}",
+                "end": f"{end_hour:02d}:{end_min:02d}",
+                "duration": task.duration_minutes,
+                "priority": task.priority,
+                "category": task.category,
+            })
+
+            current_hour = end_hour
+            current_minute = end_min
+
+        return schedule
+
     def explain_plan(self, schedule: list[dict]) -> str:
         """Generate a human-readable explanation of why each task was scheduled."""
         if not schedule:
