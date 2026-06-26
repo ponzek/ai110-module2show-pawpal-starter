@@ -47,11 +47,43 @@ pip install -r requirements.txt
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+============================================================
+PawPal+ Daily Schedule for Jordan
+   Pets: Mochi (dog), Whiskers (cat)
+   Time budget: 120 minutes
+============================================================
+
+Time           Task                      Pet            Dur  Priority
+--------------------------------------------------------------------
+08:30-08:40    Breakfast feeding         Mochi         10m  [high]
+07:30-07:40    Breakfast feeding         Whiskers      10m  [high]
+08:00-08:30    Morning walk              Mochi         30m  [high]
+08:30-08:35    Joint supplement          Mochi          5m  [medium]
+08:35-08:45    Litter box cleaning       Whiskers      10m  [medium]
+08:45-09:00    Play session              Whiskers      15m  [low]
+09:00-09:20    Afternoon enrichment      Mochi         20m  [low]
+
+>> Today's Plan (7 tasks, 100 min total):
+
+  1. 08:30 -- Breakfast feeding for Mochi (10 min) [high]
+     Reason: high priority -- scheduled first
+  2. 07:30 -- Breakfast feeding for Whiskers (10 min) [high]
+     Reason: high priority -- scheduled first
+  3. 08:00 -- Morning walk for Mochi (30 min) [high]
+     Reason: high priority -- scheduled first
+  4. 08:30 -- Joint supplement for Mochi (5 min) [medium]
+     Reason: medium priority
+  5. 08:35 -- Litter box cleaning for Whiskers (10 min) [medium]
+     Reason: medium priority
+  6. 08:45 -- Play session for Whiskers (15 min) [low]
+     Reason: low priority -- fit into remaining time
+  7. 09:00 -- Afternoon enrichment for Mochi (20 min) [low]
+     Reason: low priority -- fit into remaining time
+
+>> Time remaining: 20 min out of 120 min budget
+
+[OK] No scheduling conflicts detected.
+============================================================
 ```
 
 ## 🧪 Testing PawPal+
