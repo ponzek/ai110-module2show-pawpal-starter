@@ -144,7 +144,7 @@ tests/test_pawpal.py::TestEdgeCases::test_filter_by_nonexistent_pet PASSED
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
@@ -155,12 +155,11 @@ tests/test_pawpal.py::TestEdgeCases::test_filter_by_nonexistent_pet PASSED
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
-
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
-
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+1. **Enter owner info** — Type your name and set how much time you have today using the slider.
+2. **Add your pets** — Enter a pet's name, species, and age, then click "Add Pet." Repeat for each pet.
+3. **Add tasks** — Pick a pet from the dropdown, fill in the task details (name, duration, priority, category, preferred time), and click "Add Task." Tasks show up in a table under each pet.
+4. **Choose sort order** — Select whether to sort by priority (high first) or by time (earliest first).
+5. **Generate the schedule** — Click "Build Today's Schedule." The app creates a daily plan that fits within your time budget.
+6. **Review the plan** — The schedule shows as a table with time slots, task names, pets, and priorities. Expand "Why this schedule?" to see the reasoning behind each task's placement.
+7. **Check for conflicts** — If two tasks overlap, the app shows a warning with the conflicting times and suggests adjusting preferred times.
+8. **See time remaining** — A metric at the bottom shows how many minutes are left in your budget.

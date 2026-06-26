@@ -15,8 +15,11 @@ Relationships: Owner *owns* one or more Pets; each Pet *has* zero or more Tasks;
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+Yes, the design changed in a few ways during implementation:
+
+- Added a `frequency` field (`"once"`, `"daily"`, `"weekly"`) and a `due_date` field to Task. The original design only had an `is_recurring` boolean, but that wasn't enough to calculate the next occurrence date.
+- Added `get_all_tasks()` to Owner so the Scheduler could pull every task across all pets in one call instead of looping through pets itself. This kept the Scheduler cleaner.
+- Added `sort_by_time()`, `filter_by_pet()`, and `filter_incomplete()` to Scheduler during Phase 4. The initial design only had priority sorting and time-budget filtering.
 
 ---
 
@@ -24,8 +27,12 @@ Relationships: Owner *owns* one or more Pets; each Pet *has* zero or more Tasks;
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers three main constraints:
+1. **Priority** — High-priority tasks get scheduled first (meds and feeding before enrichment).
+2. **Time budget** — Tasks are added in priority order until the owner's available minutes run out. Lower-priority tasks get dropped if there's no room.
+3. **Preferred time** — If a task has a preferred time, the scheduler uses it. Otherwise, it fills in the next available slot starting at 08:00.
+
+Priority felt like the most important constraint because missing medication or a feeding is worse than skipping a play session. Time budget came second because the owner has a real limit on their day.
 
 **b. Tradeoffs**
 
@@ -37,13 +44,17 @@ The scheduler detects time conflicts (two tasks at the same time) but only warns
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI throughout the project for several tasks:
+- **Design brainstorming** — Asked for help identifying the four main classes and their relationships, which became the UML diagram.
+- **Code generation** — Used AI to generate the class skeletons from the UML, then to implement the scheduling logic and sorting algorithms.
+- **Test writing** — Asked AI to draft test cases covering happy paths and edge cases like empty schedules and back-to-back tasks.
+- **Debugging** — When the CLI demo crashed on Windows due to emoji encoding, AI helped diagnose the `cp1252` codec error and add a fix.
+
+The most helpful prompts were specific ones like "sort tasks by their HH:MM time string using a lambda key" rather than vague ones like "make the scheduler better."
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+One moment where I didn't accept an AI suggestion as-is was the commit messages. The AI generated overly detailed messages like "Clean up comments: remove e.g. from docstrings" which drew unnecessary attention to minor changes. I had it amend the message to something simpler. I also reviewed the generated code to make sure comments and docstrings didn't use language that felt too polished or unlike how I'd naturally write.
 
 ---
 
@@ -51,13 +62,20 @@ The scheduler detects time conflicts (two tasks at the same time) but only warns
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+The test suite covers 27 tests across these behaviors:
+- Task completion — `mark_complete()` actually changes the status
+- Task addition/removal — adding and removing tasks updates the pet's list correctly
+- Input validation — `is_valid()` rejects empty titles, zero durations, and invalid priority levels
+- Sorting — tasks sort correctly by time (chronological) and by priority (high first)
+- Recurring tasks — completing a daily task creates a new one for tomorrow, weekly creates one for next week, non-recurring returns nothing
+- Conflict detection — overlapping time slots get flagged, non-overlapping and back-to-back tasks don't
+- Edge cases — empty schedules, no pets, filtering by a pet that doesn't exist
+
+These tests matter because the scheduler is the core of the app. If sorting or filtering breaks, the daily plan would be wrong and the owner could miss important tasks.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I'm fairly confident the scheduler works correctly — **4 out of 5**. All 27 tests pass and they cover the main paths. If I had more time, I'd test: tasks with identical preferred times across different pets, what happens when available_minutes is 0, and stress-testing with 50+ tasks to see if performance holds up.
 
 ---
 
@@ -65,12 +83,12 @@ The scheduler detects time conflicts (two tasks at the same time) but only warns
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I'm most satisfied with how the four classes work together. The Scheduler talks to the Owner to get pets and tasks, sorts them, filters by time, and builds a clean schedule. The separation between data (Task, Pet, Owner) and logic (Scheduler) made it easy to add new features like recurring tasks without breaking existing code.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+If I had another iteration, I would make the conflict detection smarter — instead of just warning about overlaps, it could suggest moving one of the tasks to the next available slot. I'd also add a way to edit or delete tasks from the Streamlit UI instead of only adding them.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+The biggest thing I learned is that designing the system first (UML and class skeletons) before writing any logic made everything smoother. When I got to implementation, I already knew what each class was responsible for and how they connected. AI was most useful as a collaborator for generating boilerplate and catching edge cases, but I still needed to make judgment calls about what to keep, what to change, and how to organize the code.
