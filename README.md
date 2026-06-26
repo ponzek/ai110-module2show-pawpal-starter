@@ -88,19 +88,59 @@ Time           Task                      Pet            Dur  Priority
 
 ## 🧪 Testing PawPal+
 
-```bash
-# Run the full test suite:
-pytest
+Run the test suite with:
 
-# Run with coverage:
-pytest --cov
+```bash
+python -m pytest tests/test_pawpal.py -v
 ```
+
+The test suite covers 27 tests across 7 areas:
+- **Task completion** — verifies `mark_complete()` changes status
+- **Task addition** — adding/removing tasks updates the pet's list
+- **Task validation** — `is_valid()` catches empty titles, zero duration, bad priority
+- **Sorting** — tasks sort correctly by time and by priority
+- **Recurrence** — completing a daily task creates tomorrow's task, weekly creates next week's
+- **Conflict detection** — overlapping times are flagged, back-to-back tasks are not
+- **Edge cases** — empty schedules, no pets, filtering by nonexistent pet
 
 Sample test output:
 
 ```
-# Paste your pytest output here
+============================= test session starts =============================
+collected 27 items
+
+tests/test_pawpal.py::TestTaskCompletion::test_task_starts_incomplete PASSED
+tests/test_pawpal.py::TestTaskCompletion::test_mark_complete_changes_status PASSED
+tests/test_pawpal.py::TestTaskCompletion::test_mark_complete_is_idempotent PASSED
+tests/test_pawpal.py::TestTaskAddition::test_pet_starts_with_no_tasks PASSED
+tests/test_pawpal.py::TestTaskAddition::test_adding_one_task_increases_count PASSED
+tests/test_pawpal.py::TestTaskAddition::test_adding_multiple_tasks PASSED
+tests/test_pawpal.py::TestTaskAddition::test_remove_task_decreases_count PASSED
+tests/test_pawpal.py::TestTaskValidation::test_valid_task PASSED
+tests/test_pawpal.py::TestTaskValidation::test_empty_title_is_invalid PASSED
+tests/test_pawpal.py::TestTaskValidation::test_zero_duration_is_invalid PASSED
+tests/test_pawpal.py::TestTaskValidation::test_bad_priority_is_invalid PASSED
+tests/test_pawpal.py::TestSorting::test_sort_by_time_returns_chronological_order PASSED
+tests/test_pawpal.py::TestSorting::test_sort_by_time_puts_no_time_last PASSED
+tests/test_pawpal.py::TestSorting::test_sort_by_priority_high_first PASSED
+tests/test_pawpal.py::TestRecurrence::test_daily_task_creates_next_day PASSED
+tests/test_pawpal.py::TestRecurrence::test_weekly_task_creates_next_week PASSED
+tests/test_pawpal.py::TestRecurrence::test_non_recurring_task_returns_none PASSED
+tests/test_pawpal.py::TestConflictDetection::test_overlapping_tasks_detected PASSED
+tests/test_pawpal.py::TestConflictDetection::test_no_conflicts_when_tasks_dont_overlap PASSED
+tests/test_pawpal.py::TestConflictDetection::test_back_to_back_tasks_no_conflict PASSED
+tests/test_pawpal.py::TestEdgeCases::test_schedule_with_no_tasks PASSED
+tests/test_pawpal.py::TestEdgeCases::test_schedule_with_no_pets PASSED
+tests/test_pawpal.py::TestEdgeCases::test_explain_plan_with_empty_schedule PASSED
+tests/test_pawpal.py::TestEdgeCases::test_filter_incomplete_skips_completed PASSED
+tests/test_pawpal.py::TestEdgeCases::test_schedule_respects_time_budget PASSED
+tests/test_pawpal.py::TestEdgeCases::test_filter_by_pet_returns_correct_tasks PASSED
+tests/test_pawpal.py::TestEdgeCases::test_filter_by_nonexistent_pet PASSED
+
+============================= 27 passed in 0.53s ==============================
 ```
+
+**Confidence Level: 4/5** — All 27 tests pass. The scheduler handles the main use cases well. With more time I would add tests for edge cases like tasks with identical times across different pets and stress-testing with a large number of tasks.
 
 ## 📐 Smarter Scheduling
 
