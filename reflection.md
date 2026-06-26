@@ -29,8 +29,7 @@ Relationships: Owner *owns* one or more Pets; each Pet *has* zero or more Tasks;
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The scheduler detects time conflicts (two tasks at the same time) but only warns the user instead of automatically resolving them. This is a reasonable tradeoff because the owner might want to decide which task to move — for example, they might reschedule a vet checkup but not skip a feeding. Automatically resolving conflicts could lead to important tasks being silently dropped.
 
 ---
 

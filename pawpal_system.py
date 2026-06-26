@@ -6,6 +6,7 @@ Uses Python dataclasses for clean, maintainable data objects.
 """
 
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 from typing import Optional
 
 
@@ -22,8 +23,10 @@ class Task:
     priority: str = "medium"  # "low", "medium", "high"
     category: str = "general"  # "walk", "feeding", "meds", "grooming", "enrichment"
     is_recurring: bool = False
+    frequency: str = "once"  # "once", "daily", "weekly"
     preferred_time: Optional[str] = None  # "08:00"
     completed: bool = False
+    due_date: Optional[date] = None
 
     def is_valid(self) -> bool:
         """Return True if the task has a non-empty title, positive duration, and valid priority."""
@@ -160,6 +163,55 @@ class Scheduler:
     def sort_by_priority(self, tasks: list[Task]) -> list[Task]:
         """Sort tasks by priority (high first), then by shorter duration."""
         return sorted(tasks)
+
+    def sort_by_time(self, tasks: list[Task]) -> list[Task]:
+        """Sort tasks by their preferred_time. Tasks without a time go to the end."""
+        def time_key(task):
+            if task.preferred_time:
+                parts = task.preferred_time.split(":")
+                return int(parts[0]) * 60 + int(parts[1])
+            return 9999  # no preferred time goes last
+        return sorted(tasks, key=time_key)
+
+    def filter_by_pet(self, pet_name: str) -> list[Task]:
+        """Return only the tasks that belong to a specific pet."""
+        for pet in self.owner.get_pets():
+            if pet.name == pet_name:
+                return pet.get_tasks()
+        return []
+
+    def filter_incomplete(self, tasks: list[Task]) -> list[Task]:
+        """Return only tasks that have not been completed yet."""
+        return [t for t in tasks if not t.completed]
+
+    def handle_recurring(self, task: Task, pet: Pet) -> Optional[Task]:
+        """When a recurring task is completed, create the next occurrence."""
+        if not task.is_recurring or task.frequency == "once":
+            return None
+
+        # Figure out the next due date based on frequency
+        today = task.due_date if task.due_date else date.today()
+        if task.frequency == "daily":
+            next_due = today + timedelta(days=1)
+        elif task.frequency == "weekly":
+            next_due = today + timedelta(weeks=1)
+        else:
+            return None
+
+        # Create a fresh copy of the task with the new due date
+        next_task = Task(
+            title=task.title,
+            duration_minutes=task.duration_minutes,
+            priority=task.priority,
+            category=task.category,
+            is_recurring=True,
+            frequency=task.frequency,
+            preferred_time=task.preferred_time,
+            completed=False,
+            due_date=next_due,
+        )
+        pet.add_task(next_task)
+        return next_task
 
     def detect_conflicts(self, schedule: list[dict]) -> list[str]:
         """Identify overlapping time slots in the schedule."""

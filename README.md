@@ -108,10 +108,10 @@ Sample test output:
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_priority()`, `Scheduler.sort_by_time()` | Sorts by priority (high first) or by preferred time (earliest first) |
+| Filtering | `Scheduler.filter_by_time()`, `Scheduler.filter_by_pet()`, `Scheduler.filter_incomplete()` | Filters tasks by time budget, pet name, or completion status |
+| Conflict handling | `Scheduler.detect_conflicts()` | Compares time slots and returns warnings for overlapping tasks |
+| Recurring tasks | `Scheduler.handle_recurring()` | Creates the next occurrence (daily or weekly) when a task is completed |
 
 ## 📸 Demo Walkthrough
 
