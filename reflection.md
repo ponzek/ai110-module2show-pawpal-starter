@@ -4,8 +4,14 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+The initial UML design uses four classes that map directly to the real-world domain:
+
+- **Owner** — Represents the pet owner. Holds the owner's name, daily time budget (`available_minutes`), care preferences, and a list of their pets. Responsible for managing pet registration and setting availability.
+- **Pet** — Represents an individual pet. Stores name, species, age, special needs, and a list of care tasks. Responsible for adding/removing tasks.
+- **Task** — A single care activity (walk, feeding, meds, grooming, enrichment). Uses a Python dataclass with fields for title, duration, priority level (low/medium/high), category, recurrence flag, and preferred time. Supports comparison for priority-based sorting.
+- **Scheduler** — The brain of the system. Takes an Owner (with their pets and tasks) and produces a daily schedule. Responsible for sorting by priority, filtering tasks to fit the time budget, detecting conflicts, and generating a human-readable explanation of the plan.
+
+Relationships: Owner *owns* one or more Pets; each Pet *has* zero or more Tasks; the Scheduler *plans for* an Owner and *processes* their Tasks.
 
 **b. Design changes**
 
